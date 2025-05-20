@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,12 +18,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.notificacao.dto.NotificationDto;
 import com.rabbitmq.notificacao.service.NotificationService;
 
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 public class NotificationControllerTeste {
 	
 	private MockMvc mockMvc;
@@ -35,33 +39,33 @@ public class NotificationControllerTeste {
 	
 	@BeforeEach
 	void setUp() {
-		//Inicialização do MockMvc
-		mockMvc = MockMvcBuilders.standaloneSetup(notificationController).build();
-		//Inicialização do ObjectMapper
-		objectMapper = new ObjectMapper();
-	    lenient().doNothing().when(notificationService).sendNotification(org.mockito.ArgumentMatchers.any(NotificationDto.class));
+	    mockMvc = MockMvcBuilders.standaloneSetup(notificationController).build();
+	    objectMapper = new ObjectMapper();
 
+	    // Configuração do mock
+	    doNothing().when(notificationService).sendNotification(any(NotificationDto.class));
 	}
-	
+
+
 	@Test
-	void testSendNotification() throws Exception{	
-		
-		//Criação do Dto de Notificação
-		NotificationDto notificationDto = new NotificationDto();
-		notificationDto.setMessage("Mensagem de teste");
-		notificationDto.setEmail("teste@Exemplo.com");
-		notificationDto.setSubject("Assunto do email Teste");
-		
-		//Conversão do Dto para JSON
-		String notificationJson = objectMapper.writeValueAsString(notificationDto);
-		
-		//Execução da requisição POST e validação da resposta.
-		mockMvc.perform(post("/api/v1/notifications/message")
-				.contentType("application/json")
-				.content(notificationJson))
-				.andExpect(status().isOk())
-				.andExpect(content().string("Solicitação de notificação enviada com sucesso!"));
+	void testSendNotification() throws Exception {
+	    NotificationDto notificationDto = new NotificationDto();
+	    notificationDto.setMessage("Mensagem de teste");
+	    notificationDto.setEmail("teste@exemplo.com");
+	    notificationDto.setSubject("Assunto do email Teste");
+
+	    String notificationJson = objectMapper.writeValueAsString(notificationDto);
+
+	    mockMvc.perform(post("/api/v1/notifications/message")
+	            .contentType("application/json")
+	            .content(notificationJson))
+	            .andExpect(status().isOk())
+	            .andExpect(content().string("Solicitação de notificação enviada com sucesso!"));
+
+	    verify(notificationService, times(1)).sendNotification(any(NotificationDto.class));
 	}
+
+
 	
 
 }

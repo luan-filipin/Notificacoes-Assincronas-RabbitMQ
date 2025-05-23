@@ -19,13 +19,13 @@ import com.rabbitmq.notificacao.repository.UserRepository;
 public class UserServiceTest {
 	
 	@Mock
-	private UserRepository userRepository; // Simulador do repositório de usuários.
+	private UserRepository userRepository; 
 	@Mock
-	private UserMapper userMapper; // Simulador do mapeador de usuários.
+	private UserMapper userMapper; 
 	@Mock 
-	private PasswordEncoder passwordEncoder; // Simulador do codificador de senhas.
+	private PasswordEncoder passwordEncoder; 
 	@InjectMocks
-	private UserServiceImp userService; // Injeção de dependência do serviço de usuários.
+	private UserServiceImp userService;
 	
 	@Test
 	void shouldCreateUserSuccessfully() {

@@ -1,26 +1,18 @@
 package com.rabbitmq.notificacao.service;
 
-import java.util.ArrayList;
-import java.util.Date;
+
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.Authentication;
 
 import com.rabbitmq.notificacao.dto.TokenDto;
-import com.rabbitmq.notificacao.dto.UserDto;
 import com.rabbitmq.notificacao.mapper.UserMapper;
 import com.rabbitmq.notificacao.model.User;
 import com.rabbitmq.notificacao.repository.UserRepository;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -28,7 +20,6 @@ import jakarta.annotation.PostConstruct;
 @Service
 public class AuthServiceImp implements AuthService{
 	
-	private final UserMapper userMapper;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
@@ -49,7 +40,6 @@ public class AuthServiceImp implements AuthService{
 	}
 	
 	public AuthServiceImp(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
-		this.userMapper = userMapper;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = jwtService;

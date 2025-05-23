@@ -48,6 +48,7 @@ public class EmailServiceTest {
 
 	}
 	
+	//Criamos um teste para verificar quando a uma falha no envio do email.
 	@Test
 	void whenSendEmailFails() {
 		

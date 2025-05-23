@@ -14,10 +14,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import com.rabbitmq.notificacao.dto.NotificationDto;
+import com.rabbitmq.notificacao.exception.EmailNotSentException;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailServiceTest {
@@ -56,14 +58,17 @@ public class EmailServiceTest {
 		NotificationDto notificationDTO = new NotificationDto("teste@gmail.com", "Assunto", "Mensagem");
 		
 		//Monta uma Exception para o teste.
-		doThrow(new RuntimeException("Falha no envio de e-mail"))
+		doThrow(new MailSendException("Falha no envio de e-mail"))
 		.when(javaMailSender)
 		.send(any(SimpleMailMessage.class));
 		
 		//Act & Assert.
-		assertThrows(
-				RuntimeException.class, 
+		EmailNotSentException exception = assertThrows(
+				EmailNotSentException.class, 
 				() -> emailService.sendEmail(notificationDTO)
 		);
+		
+		assertThat(exception.getMessage())
+		.isEqualTo("Erro ao enviar e-mail para: teste@gmail.com");
 	}
 }

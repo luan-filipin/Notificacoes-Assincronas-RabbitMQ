@@ -1,12 +1,16 @@
 package com.rabbitmq.notificacao.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
 
 import com.rabbitmq.notificacao.dto.TokenDto;
 import com.rabbitmq.notificacao.dto.UserDto;
@@ -14,6 +18,7 @@ import com.rabbitmq.notificacao.mapper.UserMapper;
 import com.rabbitmq.notificacao.model.User;
 import com.rabbitmq.notificacao.repository.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -26,6 +31,7 @@ public class AuthServiceImp implements AuthService{
 	private final UserMapper userMapper;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JwtService jwtService;
 	private SecretKey key;
 	
 
@@ -42,34 +48,25 @@ public class AuthServiceImp implements AuthService{
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
 	}
 	
-	public AuthServiceImp(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public AuthServiceImp(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
 		this.userMapper = userMapper;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.jwtService = jwtService;
 	}
 	
 
-	@Override
-	public TokenDto authenticate(String email, String password) {
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-		UserDto userDto = userMapper.toDto(user);
-		if(!passwordEncoder.matches(password, userDto.getPassword())) {
-			throw new RuntimeException("Credenciais invalidas");
-		}
-		
-		String token = generateToken(userDto);
-		
-		return new TokenDto(token, jwtExpiration/1000);
-	}
-
     @Override
-    public String generateToken(UserDto userDto) {
-        return Jwts.builder()
-                .setSubject(userDto.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
+    public TokenDto authenticate(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Credenciais inválidas");
+        }
+
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new TokenDto(token, jwtService.getExpirationInSeconds());
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.rabbitmq.notificacao.dto.NotificationDto;
 import com.rabbitmq.notificacao.dto.UserDto;
@@ -14,6 +15,7 @@ import com.rabbitmq.notificacao.repository.UserRepository;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
+@Service
 public class EmailServiceImp implements EmailService {
 	
 	@Autowired
